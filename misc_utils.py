@@ -1,3 +1,5 @@
+import base64
+
 def id_generator():
     from base64 import b32encode
     from hashlib import sha1
@@ -8,3 +10,13 @@ def id_generator():
 
 def upload_image(instance, filename):
     return 'images/{filename}'.format(filename=filename)
+
+def url_encode_token(token:str):
+    bytes_token = token.encode('ascii')
+    encoded_token = base64.urlsafe_b64encode(bytes_token)
+    return encoded_token
+
+def url_decode_token(encoded_token):
+    bytes_token = base64.urlsafe_b64decode(encoded_token)
+    decoded_token = bytes_token.decode('ascii')
+    return decoded_token

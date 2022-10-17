@@ -16,17 +16,18 @@ def user_from_access_token(request):
     return data
 
 def get_engagement_data_or_400(request):
-    """Intended to be used as following: 'type, id, like_or_dislike = get_engagement_data_or_400'"""
+    """Intended to be used as following: 'type, id, vote = get_engagement_data_or_400'"""
     try:
-            type:str = request.data.get('type')
+        type:str = request.data.get('type')
     except:
-        return Response({'error': 'Please specify if model is "post" or "comment"'}, status=400)
+        raise {'error': 'Please specify if model is "post" or "comment"'}
     try:
         id:str = request.data.get('id')
     except:
-        return Response({'error': 'Please specify the id for the post or comment'}, status=400)
+        raise {'error': 'Please specify the id for the post or comment'}
     try:
-        like_or_dislike:str = request.data.get('like_or_dislike')
+        like_or_dislike:str = request.data.get('vote')
     except:
-        return Response({'error': 'Please specify whether the request is a like or dislike'})
+        raise {'error': 'Please specify whether the request is a like or dislike'}
     return (type, id, like_or_dislike)
+    

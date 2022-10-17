@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from request_utils import user_from_access_token, get_engagement_data_or_400
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -12,24 +12,52 @@ from rest_framework.pagination import PageNumberPagination
 class LikesHandler(APIView):
     def post(self, request):
         user:User = user_from_access_token(request)
+        error = Response({"error": "Incorrect input. Please specify the 'type' 'id' and 'vote' in the body of the POST request and ensure the data is formatted correctly"}, status=400)
         print(f'\n\n{request.data}\n\n')
-        type, id, like_or_dislike = get_engagement_data_or_400(request)
+        type, id, vote = get_engagement_data_or_400(request)
         if type.lower() == 'post':
-            match like_or_dislike:
+            match vote:
                 case 'like':
-                    if id in set(user.liked_posts.all()):
-                        return Response({'yay': 'you did it right'})
+                    if id in set(user.disliked_posts.all().values_list('post_ID', flat=True)):
+                        user.disliked_posts.remove(
+                            Post.objects.get(post_ID=id)
+                        )
+                    if id not in set(user.liked_posts.all().values_list('post_ID', flat=True)):
+                        user.liked_posts.add(
+                            get_object_or_404(Post, post_ID=id)
+                        )
+                        
+                        return Response({}, status=201)
                     else:
-                        return Response({'yay': 'you did it wrong'})
+                        user.liked_posts.remove(
+                            # Post.objects.get(post_ID=id)
+                            get_object_or_404(Post, post_ID=id)
+
+                        )
+                        return Response({}, status=201)
                 case 'dislike':
-                    if id in set(user.disliked_posts.all()):
-                        pass
+                    if id in set(user.liked_posts.all().values_list('post_ID', flat=True)):
+                        user.liked_posts.remove(
+                            Post.objects.get(post_ID=id)
+                        )
+                    if id not in set(user.disliked_posts.all().values_list('post_ID', flat=True)):
+                        user.disliked_posts.add(
+                            # Post.objects.get(post_ID=id)
+                            get_object_or_404(Post, post_ID=id)
+
+                        )
+                        return Response({}, status=201)
                     else:
-                        pass
+                        user.disliked_posts.remove(
+                            # Post.objects.get(post_ID=id)
+                            get_object_or_404(Post, post_ID=id)
+
+                        )
+                        return Response({},  bstatus=201)
                 case _:
-                    pass
+                    return error
         elif type.lower() == 'comment':
-            match like_or_dislike:
+            match vote:
                 case 'like':
                     if id in set(user.liked_comments.all()):
                         return Response({'yay': 'you did it right'})
@@ -41,7 +69,7 @@ class LikesHandler(APIView):
                     else:
                         pass
                 case _:
-                    pass
+                    return error
         else:
             return Response({'error': 'All fields are here, but fields are invalid'}, status=400)
 

@@ -29,10 +29,4 @@ urlpatterns = [
     path('api/token/verification/', TokenVerifyView.as_view(), name='token_verification'),
     path('accounts/', include('Accounts.urls')),
     path('engagements/', include('Engagements.urls')),
-    # path('test/', views.Test),
-    path('readonly/', views.TestHTTP.as_view()),
-    # path('userpost/', views.UserPostHandler.as_view()),
-    # path('userpost/<str:id>', views.UserPostHandler.as_view()),
-    # path('likes/', views.UserLikesHandler.as_view()),
-    path('testing_manytomanyfield/', views.TestHTTP.as_view()),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
