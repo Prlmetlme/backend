@@ -13,7 +13,6 @@ class LikesHandler(APIView):
     def post(self, request):
         user:User = user_from_access_token(request)
         error = Response({"error": "Incorrect input. Please specify the 'type' 'id' and 'vote' in the body of the POST request and ensure the data is formatted correctly"}, status=400)
-        print(f'\n\n{request.data}\n\n')
         type, id, vote = get_engagement_data_or_400(request)
         if type.lower() == 'post':
             match vote:
@@ -53,7 +52,7 @@ class LikesHandler(APIView):
                             get_object_or_404(Post, post_ID=id)
 
                         )
-                        return Response({},  bstatus=201)
+                        return Response({}, status=201)
                 case _:
                     return error
         elif type.lower() == 'comment':
@@ -79,14 +78,9 @@ class UserPostHandler(APIView):
         full_request = request.data
         # full_request['author'] = user
         serialized_post = PostSerializer(data=request.data)
-        # print(f'\n\n\n{full_request}\n\n\n{request.data}\n\n\n')
         if serialized_post.is_valid(raise_exception=True):
             serialized_post.save(author=user)
             return Response(serialized_post.data, status=201)
-        # else:
-        #     print('\n\n\n')
-        #     print(serialized_post)
-        #     print('\n\n\n')
         return Response({'post': {'serialized_post.data': 'invalid form'}}, status=400)
 
     def get(self, request, **kwargs):
@@ -96,7 +90,6 @@ class UserPostHandler(APIView):
                 user_serialized = UserSerializer(user)
                 user_posts = Post.objects.filter(author=user)
                 serialized = PostSerializer(user_posts, many=True)
-                print(f'\n\n{kwargs.get("id")}\n\n')
                 return Response(serialized.data)
             else:
                 return Response({})

@@ -81,7 +81,7 @@ class AccountHandlerView(APIView):
 class SelfHandlerView(APIView):
     def get(self, request):
         self_user = user_from_access_token(request)
-        seralized = UserSerializer(self_user)
+        seralized = ReadUserSerializer(self_user)
 
         return Response(seralized.data)
 

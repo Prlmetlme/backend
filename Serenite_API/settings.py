@@ -35,6 +35,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -48,6 +49,8 @@ INSTALLED_APPS = [
 ]
 
 AUTH_USER_MODEL = 'Accounts.User'
+
+ASGI_APPLICATION = 'Serenite_API.asgi.application'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

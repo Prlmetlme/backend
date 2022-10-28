@@ -33,16 +33,25 @@ class UserSerializer(serializers.ModelSerializer):
 class ReadUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        exclude = ('id', 'groups', 'user_permissions', 'password')
+        exclude = ('id', 'groups', 'user_permissions', 'password', 'disliked_posts', 'disliked_comments', 'liked_posts', 'liked_comments')
 
+class SafeUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'date_joined', 'static_user_id', 'last_active', 'last_login']
 
 
 
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
-    def validate(self, attrs):
+    def validate(self, attrs:dict):
         data = super(CustomTokenObtainPairSerializer, self).validate(attrs)
+        username = attrs.get('username')
+        user:User = User.objects.get(username=username)
+        user.last_login = datetime.datetime.utcnow().isoformat() + 'Z'
+        user.last_active = datetime.datetime.utcnow().isoformat() + 'Z'
+        user.save()
         access_token_lifetime:datetime.timedelta = settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"]
         refresh_token_lifetime:datetime.timedelta = settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"]
         data.update({ 'access_lifetime_seconds': access_token_lifetime.total_seconds() })
